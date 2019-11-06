@@ -20,7 +20,16 @@
     "typescript": "~3.6.2"
   },
   "dependencies": {
+    "@aws-cdk/aws-apigateway": "1.15.0",
+    "@aws-cdk/aws-cloudfront": "1.15.0",
+    "@aws-cdk/aws-dynamodb": "1.15.0",
+    "@aws-cdk/aws-lambda": "1.15.0",
+    "@aws-cdk/aws-logs": "1.15.0",
+    "@aws-cdk/aws-s3": "1.15.0",
+    "@aws-cdk/aws-sqs": "1.15.0",
     "@aws-cdk/core": "^1.15.0",
+    "@types/aws-lambda": "8.10.34",
+    "@types/node": "12.12.5",
     "source-map-support": "^0.5.9"
   }
 }
