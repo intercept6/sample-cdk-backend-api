@@ -6,3 +6,8 @@
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
+
+
+```bash
+npx -p @vue/cli vue create vue-pwa-tutorial
+```
