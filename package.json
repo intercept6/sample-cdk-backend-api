@@ -8,7 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy": "cdk deploy '*Stack'"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.17.1",
@@ -31,6 +32,8 @@
     "@aws-cdk/core": "1.17.1",
     "@types/aws-lambda": "8.10.34",
     "@types/node": "12.12.5",
+    "aws-sdk": "2.575.0",
+    "axios": "0.19.0",
     "frontend": "file:src/frontend",
     "source-map-support": "^0.5.9"
   }

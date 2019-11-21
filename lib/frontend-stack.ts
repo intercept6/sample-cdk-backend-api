@@ -28,11 +28,15 @@ export class FrontendStack extends Stack {
         // 先ほど作ったOAIにs3:GetObjectを許可する
         // websiteBucketはpublic access出来ない設定（デフォルト）になっているので
         // こうしておかないとCloudFrontからアクセス出来ない
-        const webSiteBucketPolicyStatement = new PolicyStatement({effect: Effect.ALLOW});
+        const webSiteBucketPolicyStatement = new PolicyStatement({
+            effect: Effect.ALLOW,
+            actions: ['s3:GetObject'],
+            resources: [`${websiteBucket.bucketArn}/*`]
+        });
         webSiteBucketPolicyStatement.addCanonicalUserPrincipal(OAI.attrS3CanonicalUserId);
-        webSiteBucketPolicyStatement.addActions("s3:GetObject");
-        webSiteBucketPolicyStatement.addResources(`${websiteBucket.bucketArn}/*`);
         websiteBucket.addToResourcePolicy(webSiteBucketPolicyStatement);
+        // webSiteBucketPolicyStatement.addActions("s3:GetObject");
+        // webSiteBucketPolicyStatement.addResources(`${websiteBucket.bucketArn}/*`);
 
         const distribution = new CloudFrontWebDistribution(this, 'WebsiteDistribution', {
             originConfigs: [

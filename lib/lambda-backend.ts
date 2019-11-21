@@ -12,15 +12,17 @@ export interface LambdaFunctionProps {
     logRetention?: RetentionDays
     resource: Resource
     method: MethodType
+    environment?: { [key: string]: string }
 }
 
 export class LambdaBackend extends Function {
     constructor(scope: Construct, id: string, props: LambdaFunctionProps) {
 
         super(scope, id, {
-            runtime: props.runtime || Runtime.NODEJS_10_X,
-            handler: props.handler || 'index.handler',
+            runtime: props.runtime || Runtime.GO_1_X,
+            handler: props.handler || 'main',
             code: props.code,
+            environment: props.environment || undefined,
             logRetention: props.logRetention || RetentionDays.TWO_WEEKS
         });
 

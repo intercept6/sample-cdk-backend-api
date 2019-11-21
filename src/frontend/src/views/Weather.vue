@@ -5,18 +5,21 @@
 </template>
 
 
-<!--<script>-->
-<!--  new Vue({-->
-<!--    el: "#app",-->
-<!--    data() {-->
-<!--      return {-->
-<!--        info: null-->
-<!--      };-->
-<!--    },-->
-<!--    created() {-->
-<!--      axios.get("http://weather.livedoor.com/forecast/webservice/json/v1?city=400040")-->
-<!--              .then(response => (this.info = response.data))-->
-<!--              .catch(error => (this.info = error));-->
-<!--    }-->
-<!--  });-->
-<!--</script>-->
+<script>
+    import axios from 'axios';
+
+    export default {
+        name: "weather",
+        data() {
+            return {
+                info: null
+            };
+        },
+        created() {
+            const url = 'https://fyn0prjgd6.execute-api.ap-northeast-1.amazonaws.com/prod/things';
+            axios.get(url)
+                .then(response => (console.log(response.data)))
+                .catch(error => (this.info = error));
+        }
+    }
+</script>

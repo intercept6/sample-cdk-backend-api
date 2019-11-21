@@ -1,11 +1,14 @@
 import * as Lambda from 'aws-lambda';
+// import axios from 'axios';
 
 export const handler: Lambda.APIGatewayProxyHandler = async (proxyEvent: Lambda.APIGatewayEvent, _context) => {
 
-    const petId = proxyEvent.body;
-    console.log('test ');
     return {
         statusCode: 200,
-        body: 'OK'
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": "true"
+        },
+        body: '{"key": "value"}'
     }
 };

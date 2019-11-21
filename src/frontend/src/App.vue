@@ -1,5 +1,3 @@
-<!--<script src=“https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js“></script>-->
-
 <template>
     <div id="app">
         <div id="nav">
