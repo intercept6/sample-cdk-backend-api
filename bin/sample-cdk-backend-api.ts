@@ -15,13 +15,13 @@ async function deploy() {
         'GOOS=linux GOARCH=amd64 ' +
         'go build -o ./src/backend/persons/get-persons/main ./src/backend/persons/get-persons/**.go');
 
-
     const app = new cdk.App();
     new SampleCdkBackendApiStack(app, 'SampleCdkBackendApiStack');
     new FrontendStack(app, 'Frontend');
+    app.synth();
 
-    // await exec('rm ./src/backend/persons/add-person/main');
-    // await exec('rm ./src/backend/persons/get-persons/main');
+    await exec('rm ./src/backend/persons/add-person/main');
+    await exec('rm ./src/backend/persons/get-persons/main');
 }
 
 deploy();

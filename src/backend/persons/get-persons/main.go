@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -17,7 +18,7 @@ type PersonRes struct {
 	LastName  string `dynamo:"LastName"`
 }
 
-func handler() (events.APIGatewayProxyResponse, error) {
+func Handler() (events.APIGatewayProxyResponse, error) {
 
 	sess, err := session.NewSession()
 	if err != nil {
@@ -38,7 +39,7 @@ func handler() (events.APIGatewayProxyResponse, error) {
 	jsonBytes, _ := json.Marshal(persons)
 
 	resp := events.APIGatewayProxyResponse{
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
@@ -50,5 +51,5 @@ func handler() (events.APIGatewayProxyResponse, error) {
 }
 
 func main() {
-	lambda.Start(handler)
+	lambda.Start(Handler)
 }

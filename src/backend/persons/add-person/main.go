@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/google/uuid"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -18,7 +19,7 @@ type PersonReq struct {
 	LastName  string `json:"lastName"`
 }
 
-func handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	sess, err := session.NewSession()
 	if err != nil {
@@ -28,7 +29,7 @@ func handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	svc := dynamodb.New(sess)
 	id, _ := uuid.NewUUID()
 
-	reqBody := event.Body
+	reqBody := req.Body
 	fmt.Println(reqBody)
 
 	jsonBytes := ([]byte)(reqBody)
@@ -63,18 +64,17 @@ func handler(event events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	fmt.Println(putItem)
 
 	resp := events.APIGatewayProxyResponse{
-		StatusCode: 201,
+		StatusCode: http.StatusCreated,
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin":      "*",
 			"Access-Control-Allow-Credentials": "true",
 		},
-		Body:            "",
-		IsBase64Encoded: false,
+		Body: "",
 	}
 
 	return resp, nil
 }
 
 func main() {
-	lambda.Start(handler)
+	lambda.Start(Handler)
 }
