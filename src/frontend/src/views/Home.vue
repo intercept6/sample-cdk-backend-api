@@ -1,18 +1,68 @@
 <template>
-    <div class="home">
-        <img alt="Vue logo" src="../assets/logo.png"/>
-        <HelloWorld msg="Welcome to Your Vue.js App"/>
-    </div>
+  <div class="ion-page">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Add Person</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-input 
+          :value="firstName"
+          @ionInput="firstName = $event.target.value;"
+          placeholder="Enter first name">
+        </ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input 
+          :value="lastName"
+          @ionInput="lastName = $event.target.value;"
+          placeholder="Enter last name">
+        </ion-input>
+      </ion-item>
+      <ion-button @click="onClick()" full>Add</ion-button>
+    </ion-content>
+  </div>
 </template>
 
 <script>
-    // @ is an alias to /src
-    import HelloWorld from "@/components/HelloWorld.vue";
+import axios from 'axios';
 
-    export default {
-        name: "home",
-        components: {
-            HelloWorld
-        }
-    };
+export default {
+  name: "home",
+  data: function () { 
+    return {
+      firstName: '',
+      lastName: ''
+    }
+  },
+  methods: {
+    async onClick() {
+      console.log(this.firstName);
+      console.log(this.lastName);
+
+      try {
+        const response = await axios.post("https://an85ia44y9.execute-api.ap-northeast-1.amazonaws.com/prod/persons",{
+          firstName: this.firstName,
+          lastName: this.lastName
+        })
+        console.log(response.data)
+        this.firstName = ""
+        this.lastName = ""
+      }catch(e){
+        console.log(e)
+      }
+      // axios.post("https://an85ia44y9.execute-api.ap-northeast-1.amazonaws.com/prod/persons",{
+      //   firstName: this.firstName,
+      //   lastName: this.lastName
+      // })
+      // .then(function(response) {
+      //   console.log(response.data)
+      //   this.firstName = ""
+      //   this.lastName = ""
+      // })
+      // .catch(error => (console.log(error)));
+    }
+  }
+};
 </script>

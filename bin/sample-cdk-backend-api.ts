@@ -19,7 +19,10 @@ async function deploy() {
     }
 
     const app = new cdk.App();
+
     new BackendStack(app, 'BackendStack');
+
+    await exec('cd ./src/frontend/ && npm run build');
     new FrontendStack(app, 'FrontendStack');
     app.synth();
 
