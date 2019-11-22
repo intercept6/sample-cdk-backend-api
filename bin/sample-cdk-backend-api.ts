@@ -1,31 +1,34 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import {FrontendStack} from '../lib/frontend-stack';
-import {SampleCdkBackendApiStack} from "../lib/sample-cdk-backend-api-stack";
+import {BackendStack} from "../lib/backend-stack";
 import cdk = require('@aws-cdk/core');
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
+const lambda_func_basedir = '/src/backend/persons';
+const lambda_func_dir = [`${lambda_func_basedir}/add-person`, `${lambda_func_basedir}/get-persons`,
+    `${lambda_func_basedir}/del-person`];
+
 async function deploy() {
-    await exec('GO111MODULE=off go get -v -t -d ./src/backend/persons/add-person/... &&' +
-        'GOOS=linux GOARCH=amd64 ' +
-        'go build -o ./src/backend/persons/add-person/main ./src/backend/persons/add-person/**.go');
-    await exec('GO111MODULE=off go get -v -t -d ./src/backend/persons/get-persons/... &&' +
-        'GOOS=linux GOARCH=amd64 ' +
-        'go build -o ./src/backend/persons/get-persons/main ./src/backend/persons/get-persons/**.go');
+    for (let dir of lambda_func_dir) {
+        await exec(`GO111MODULE=off go get -v -t -d .${dir}/... &&` +
+            'GOOS=linux GOARCH=amd64 ' +
+            `go build -o .${dir}/main .${dir}/**.go`);
+    }
 
     const app = new cdk.App();
-    new SampleCdkBackendApiStack(app, 'SampleCdkBackendApiStack');
 
-    await exec('cd ./src/frontend/ &&' +
-        'npm run build');
+    new BackendStack(app, 'BackendStack');
 
-    new FrontendStack(app, 'Frontend');
+    await exec('cd ./src/frontend/ && npm run build');
+    new FrontendStack(app, 'FrontendStack');
     app.synth();
 
-    await exec('rm ./src/backend/persons/add-person/main');
-    await exec('rm ./src/backend/persons/get-persons/main');
+    for (let dir of lambda_func_dir) {
+        await exec(`rm .${dir}/main`);
+    }
 }
 
 deploy();

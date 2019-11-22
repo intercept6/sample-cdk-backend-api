@@ -5,7 +5,7 @@ import {Cors, RestApi} from '@aws-cdk/aws-apigateway';
 import {AttributeType, BillingMode, Table} from '@aws-cdk/aws-dynamodb';
 
 
-export class SampleCdkBackendApiStack extends cdk.Stack {
+export class BackendStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -48,5 +48,18 @@ export class SampleCdkBackendApiStack extends cdk.Stack {
             }
         });
         personsTable.grantReadWriteData(addPersonFunc);
+
+        const personIdPath = personsPath.addResource('{personId}');
+
+        const delPersonFunc = new LambdaBackend(this, 'DelPerson', {
+            code: Code.fromAsset('./src/backend/persons/del-person'),
+            resource: personIdPath,
+            method: 'DELETE',
+            environment: {
+                'TABLE_NAME': personsTable.tableName
+            }
+        });
+        personsTable.grantReadWriteData(delPersonFunc);
+
     }
 }
