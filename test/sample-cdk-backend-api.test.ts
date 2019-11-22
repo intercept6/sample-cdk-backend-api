@@ -5,7 +5,7 @@ import SampleCdkBackendApi = require('../lib/sample-cdk-backend-api-stack');
 test('Empty Stack', () => {
     const app = new cdk.App();
     // WHEN
-    const stack = new SampleCdkBackendApi.SampleCdkBackendApiStack(app, 'MyTestStack');
+    const stack = new SampleCdkBackendApi.BackendStack(app, 'MyTestStack');
     // THEN
     expectCDK(stack).to(matchTemplate({
         "Resources": {}
