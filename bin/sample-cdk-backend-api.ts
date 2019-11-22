@@ -17,6 +17,10 @@ async function deploy() {
 
     const app = new cdk.App();
     new SampleCdkBackendApiStack(app, 'SampleCdkBackendApiStack');
+
+    await exec('cd ./src/frontend/ &&' +
+        'npm run build');
+
     new FrontendStack(app, 'Frontend');
     app.synth();
 
