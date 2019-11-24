@@ -13,17 +13,18 @@ const lambda_func_dir = [`${lambda_func_basedir}/add-person`, `${lambda_func_bas
 
 async function deploy() {
     for (let dir of lambda_func_dir) {
-        await exec(`GO111MODULE=off go get -v -t -d .${dir}/... &&` +
+        await exec(`GO111MODULE=off go get -v -t -d .${dir}/... && ` +
             'GOOS=linux GOARCH=amd64 ' +
             `go build -o .${dir}/main .${dir}/**.go`);
     }
+    await exec('cd ./src/frontend/ && npm run build --fix');
 
     const app = new cdk.App();
 
-    new BackendStack(app, 'BackendStack');
+    const backend = new BackendStack(app, 'BackendStack');
+    const frontend = new FrontendStack(app, 'FrontendStack');
+    frontend.addDependency(backend);
 
-    await exec('cd ./src/frontend/ && npm run build');
-    new FrontendStack(app, 'FrontendStack');
     app.synth();
 
     for (let dir of lambda_func_dir) {

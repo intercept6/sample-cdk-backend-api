@@ -1,7 +1,7 @@
 import {Bucket} from '@aws-cdk/aws-s3';
 import {CfnOutput, Construct, Duration, RemovalPolicy, Stack, StackProps} from "@aws-cdk/core";
 import {BucketDeployment, Source} from '@aws-cdk/aws-s3-deployment';
-import {CfnCloudFrontOriginAccessIdentity, CloudFrontWebDistribution} from '@aws-cdk/aws-cloudfront'
+import {CfnCloudFrontOriginAccessIdentity, CloudFrontWebDistribution, PriceClass} from '@aws-cdk/aws-cloudfront'
 import {Effect, PolicyStatement} from '@aws-cdk/aws-iam';
 
 export class FrontendStack extends Stack {
@@ -9,12 +9,9 @@ export class FrontendStack extends Stack {
         super(scope, id, props);
 
         const websiteBucket = new Bucket(this, 'Website', {
+            publicReadAccess: true,
+            websiteIndexDocument: 'index.html',
             removalPolicy: RemovalPolicy.DESTROY
-        });
-
-        new BucketDeployment(this, 'DeployWebsite', {
-            sources: [Source.asset('src/frontend/dist')],
-            destinationBucket: websiteBucket,
         });
 
         // CloudFrontからwebsiteBucketにアクセスする際のOriginAccessIdentity
@@ -35,15 +32,16 @@ export class FrontendStack extends Stack {
         });
         webSiteBucketPolicyStatement.addCanonicalUserPrincipal(OAI.attrS3CanonicalUserId);
         websiteBucket.addToResourcePolicy(webSiteBucketPolicyStatement);
-        // webSiteBucketPolicyStatement.addActions("s3:GetObject");
-        // webSiteBucketPolicyStatement.addResources(`${websiteBucket.bucketArn}/*`);
 
         const distribution = new CloudFrontWebDistribution(this, 'WebsiteDistribution', {
             originConfigs: [
                 {
-                    s3OriginSource: {
-                        s3BucketSource: websiteBucket,
-                        originAccessIdentityId: OAI.ref
+                    // s3OriginSource: {
+                    //     s3BucketSource: websiteBucket,
+                    //     originAccessIdentityId: OAI.ref
+                    // },
+                    customOriginSource: {
+                        domainName: websiteBucket.bucketDualStackDomainName,
                     },
                     behaviors: [{
                         isDefaultBehavior: true,
@@ -52,7 +50,29 @@ export class FrontendStack extends Stack {
                         defaultTtl: Duration.seconds(0),
                     }]
                 }
-            ]
+            ],
+            errorConfigurations: [
+                {
+                    errorCode: 403,
+                    responsePagePath: '/index.html',
+                    responseCode: 200,
+                    errorCachingMinTtl: 0,
+                },
+                {
+                    errorCode: 404,
+                    responsePagePath: '/index.html',
+                    responseCode: 200,
+                    errorCachingMinTtl: 0,
+                }
+            ],
+            priceClass: PriceClass.PRICE_CLASS_200
+        });
+
+        new BucketDeployment(this, 'DeployWebsite', {
+            sources: [Source.asset('src/frontend/dist')],
+            destinationBucket: websiteBucket,
+            distribution: distribution,
+            distributionPaths: ['/*']
         });
 
         new CfnOutput(this, 'CFTopURL', {value: `https://${distribution.domainName}/`})
