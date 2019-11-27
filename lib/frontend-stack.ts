@@ -2,7 +2,7 @@ import {Bucket} from '@aws-cdk/aws-s3';
 import {CfnOutput, Construct, Duration, RemovalPolicy, Stack, StackProps} from "@aws-cdk/core";
 import {BucketDeployment, Source} from '@aws-cdk/aws-s3-deployment';
 import {CfnCloudFrontOriginAccessIdentity, CloudFrontWebDistribution, PriceClass} from '@aws-cdk/aws-cloudfront'
-import {Effect, PolicyStatement} from '@aws-cdk/aws-iam';
+import {CanonicalUserPrincipal, Effect, PolicyStatement} from '@aws-cdk/aws-iam';
 
 export class FrontendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
@@ -23,11 +23,11 @@ export class FrontendStack extends Stack {
             effect: Effect.ALLOW,
             actions: ['s3:GetObject'],
             resources: [`${websiteBucket.bucketArn}/*`],
-            // principals: [
-            //     new CanonicalUserPrincipal(OAI.attrS3CanonicalUserId)
-            // ]
+            principals: [
+                new CanonicalUserPrincipal(OAI.attrS3CanonicalUserId)
+            ]
         });
-        webSiteBucketPolicyStatement.addCanonicalUserPrincipal(OAI.attrS3CanonicalUserId);
+        // webSiteBucketPolicyStatement.addCanonicalUserPrincipal(OAI.attrS3CanonicalUserId);
         websiteBucket.addToResourcePolicy(webSiteBucketPolicyStatement);
 
         const distribution = new CloudFrontWebDistribution(this, 'WebsiteDistribution', {
