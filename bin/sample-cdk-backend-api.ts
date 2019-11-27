@@ -43,7 +43,7 @@ async function deploy() {
         `VUE_APP_API_BASE_URL=\'${apiUrl}\'\n`;
     await writeFile('./src/frontend/.env', data);
 
-    await exec('cd ./src/frontend/ && npm run build --fix');
+    await exec('cd ./src/frontend/ && npm run build');
     const frontend = new FrontendStack(app, 'FrontendStack');
     frontend.addDependency(backend);
 

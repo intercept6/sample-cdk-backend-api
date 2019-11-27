@@ -7,17 +7,19 @@
     </ion-header>
     <ion-content class="ion-padding">
       <ion-item>
-        <ion-input 
-          :value="firstName"
-          @ionInput="firstName = $event.target.value;"
-          placeholder="Enter first name">
+        <ion-input
+                :value="firstName"
+                @ionInput="firstName = $event.target.value"
+                placeholder="Enter first name"
+        >
         </ion-input>
       </ion-item>
       <ion-item>
-        <ion-input 
-          :value="lastName"
-          @ionInput="lastName = $event.target.value;"
-          placeholder="Enter last name">
+        <ion-input
+                :value="lastName"
+                @ionInput="lastName = $event.target.value"
+                placeholder="Enter last name"
+        >
         </ion-input>
       </ion-item>
       <ion-button @click="onClick()" full>Add</ion-button>
@@ -26,34 +28,34 @@
 </template>
 
 <script>
-    import axios from 'axios';
+  import axios from "axios";
 
-    const baseUrl = process.env.VUE_APP_API_BASE_URL;
+  const baseUrl = process.env.VUE_APP_API_BASE_URL;
 
 export default {
   name: "home",
-  data: function () { 
+  data: function () {
     return {
-      firstName: '',
-      lastName: ''
-    }
+      firstName: "",
+      lastName: ""
+    };
   },
   methods: {
     async onClick() {
-        console.log(baseUrl);
+      console.log(baseUrl);
       console.log(this.firstName);
       console.log(this.lastName);
 
       try {
-          const response = await axios.post(`${baseUrl}persons`, {
+        const response = await axios.post(`${baseUrl}persons`, {
           firstName: this.firstName,
           lastName: this.lastName
-          });
-          console.log(response.data);
-          this.firstName = "";
-          this.lastName = "";
-      }catch(e){
-        console.log(e)
+        });
+        console.log(response.data);
+        this.firstName = "";
+        this.lastName = "";
+      } catch (e) {
+        console.log(e);
       }
       // axios.post("https://an85ia44y9.execute-api.ap-northeast-1.amazonaws.com/prod/persons",{
       //   firstName: this.firstName,
