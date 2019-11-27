@@ -8,27 +8,24 @@ export class FrontendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
+        //<a href="https://qiita.com/tetsuya-zama/items/398e9fbae42d31c40db5" target="_blank">AWS CDKの&apos;aws-s3-deployment&apos;を使ってクライアントサイドも一緒にデプロイする - Qiita</a>
         const websiteBucket = new Bucket(this, 'Website', {
-            publicReadAccess: true,
-            websiteIndexDocument: 'index.html',
             removalPolicy: RemovalPolicy.DESTROY
         });
 
-        // CloudFrontからwebsiteBucketにアクセスする際のOriginAccessIdentity
         const OAI = new CfnCloudFrontOriginAccessIdentity(this, 'OAI', {
             cloudFrontOriginAccessIdentityConfig: {
-                comment: `WebsiteBucket-${this.stackName}`
+                comment: websiteBucket.bucketName
             }
         });
 
-        // webSiteBucketのBucketPolicyのStatement
-        // 先ほど作ったOAIにs3:GetObjectを許可する
-        // websiteBucketはpublic access出来ない設定（デフォルト）になっているので
-        // こうしておかないとCloudFrontからアクセス出来ない
         const webSiteBucketPolicyStatement = new PolicyStatement({
             effect: Effect.ALLOW,
             actions: ['s3:GetObject'],
-            resources: [`${websiteBucket.bucketArn}/*`]
+            resources: [`${websiteBucket.bucketArn}/*`],
+            // principals: [
+            //     new CanonicalUserPrincipal(OAI.attrS3CanonicalUserId)
+            // ]
         });
         webSiteBucketPolicyStatement.addCanonicalUserPrincipal(OAI.attrS3CanonicalUserId);
         websiteBucket.addToResourcePolicy(webSiteBucketPolicyStatement);
@@ -36,12 +33,9 @@ export class FrontendStack extends Stack {
         const distribution = new CloudFrontWebDistribution(this, 'WebsiteDistribution', {
             originConfigs: [
                 {
-                    // s3OriginSource: {
-                    //     s3BucketSource: websiteBucket,
-                    //     originAccessIdentityId: OAI.ref
-                    // },
-                    customOriginSource: {
-                        domainName: websiteBucket.bucketDualStackDomainName,
+                    s3OriginSource: {
+                        s3BucketSource: websiteBucket,
+                        originAccessIdentityId: OAI.ref
                     },
                     behaviors: [{
                         isDefaultBehavior: true,

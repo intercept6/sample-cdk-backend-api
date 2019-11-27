@@ -26,7 +26,9 @@
 </template>
 
 <script>
-import axios from 'axios';
+    import axios from 'axios';
+
+    const baseUrl = process.env.VUE_APP_API_BASE_URL;
 
 export default {
   name: "home",
@@ -38,17 +40,18 @@ export default {
   },
   methods: {
     async onClick() {
+        console.log(baseUrl);
       console.log(this.firstName);
       console.log(this.lastName);
 
       try {
-        const response = await axios.post("https://an85ia44y9.execute-api.ap-northeast-1.amazonaws.com/prod/persons",{
+          const response = await axios.post(`${baseUrl}persons`, {
           firstName: this.firstName,
           lastName: this.lastName
-        })
-        console.log(response.data)
-        this.firstName = ""
-        this.lastName = ""
+          });
+          console.log(response.data);
+          this.firstName = "";
+          this.lastName = "";
       }catch(e){
         console.log(e)
       }

@@ -1,12 +1,12 @@
-import cdk = require('@aws-cdk/core');
 import {Code} from '@aws-cdk/aws-lambda';
 import {LambdaBackend} from './lambda-backend';
 import {Cors, RestApi} from '@aws-cdk/aws-apigateway';
 import {AttributeType, BillingMode, Table} from '@aws-cdk/aws-dynamodb';
+import {CfnOutput, Construct, Stack, StackProps} from "@aws-cdk/core";
 
 
-export class BackendStack extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+export class BackendStack extends Stack {
+    constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
         // API Gateway
@@ -61,5 +61,7 @@ export class BackendStack extends cdk.Stack {
         });
         personsTable.grantReadWriteData(delPersonFunc);
 
+
+        new CfnOutput(this, 'ApiUrl', {value: api.url});
     }
 }
