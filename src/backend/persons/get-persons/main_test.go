@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/aws/aws-lambda-go/events"
 
 	"github.com/guregu/dynamo"
 
@@ -33,22 +36,15 @@ func createSess(t *testing.T) AwsSess {
 	return awsSess
 }
 
-type Person struct {
-	Id        string `json:"Id"`
-	FirstName string `json:"FirstName"`
-	LastName  string `json:"LastName"`
-}
-
-func createTable(t *testing.T, ddb *dynamo.DB) string {
+func createTable(t *testing.T, ddb *dynamo.DB, tableName string) {
 	t.Helper()
 	type PersonsTable struct {
 		Id string `dynamo:"Id,hash"`
 	}
-	res := ddb.CreateTable("test_table_for_get_persons", PersonsTable{})
+	res := ddb.CreateTable(tableName, PersonsTable{})
 	if err := res.Run(); err != nil {
 		t.Fatal(err)
 	}
-	return "test_table"
 }
 
 func createRecord(t *testing.T, ddb *dynamo.DB, tableName string) []Person {
@@ -67,13 +63,16 @@ func deleteTable(t *testing.T, ddb *dynamo.DB, tableName string) {
 	t.Helper()
 
 	table := ddb.Table(tableName)
-	table.DeleteTable()
+	if err := table.DeleteTable().Run(); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestGetPerson(t *testing.T) {
 	awsSess = createSess(t)
 	ddb := dynamo.New(awsSess.Sess)
-	tableName := createTable(t, ddb)
+	tableName := "test_table_for_get_persons"
+	createTable(t, ddb, tableName)
 	defer deleteTable(t, ddb, tableName)
 	wantBody := createRecord(t, ddb, tableName)
 	if err := os.Setenv("TABLE_NAME", tableName); err != nil {
@@ -81,7 +80,11 @@ func TestGetPerson(t *testing.T) {
 	}
 
 	// Handlerは必ずerrを返さない
-	res, _ := Handler()
+	req := events.APIGatewayProxyRequest{
+		Path:       "/persons",
+		HTTPMethod: http.MethodGet,
+	}
+	res, _ := Handler(req)
 
 	var gotBody []Person
 	if err := json.Unmarshal([]byte(res.Body), &gotBody); err != nil {
@@ -92,5 +95,84 @@ func TestGetPerson(t *testing.T) {
 	}
 	if !reflect.DeepEqual(gotBody, wantBody) {
 		t.Errorf("got: %v, want: %v", res.Body, wantBody)
+	}
+
+	// TODO: DynamoDBにレコードが存在するか確認する
+}
+
+func TestAddPerson(t *testing.T) {
+	awsSess = createSess(t)
+	ddb := dynamo.New(awsSess.Sess)
+	tableName := "test_table_for_add_person"
+	createTable(t, ddb, tableName)
+	defer deleteTable(t, ddb, tableName)
+	if err := os.Setenv("TABLE_NAME", tableName); err != nil {
+		t.Fatal(err)
+	}
+
+	personReq := PersonReq{
+		FirstName: "Taro",
+		LastName:  "Yamada",
+	}
+	reqBody, err := json.Marshal(personReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Handlerは必ずerrを返さない
+	req := events.APIGatewayProxyRequest{
+		Path:       "/persons",
+		HTTPMethod: http.MethodPost,
+		Body:       string(reqBody),
+	}
+	res, _ := Handler(req)
+
+	var gotBody Person
+	if err := json.Unmarshal([]byte(res.Body), &gotBody); err != nil {
+		t.Fatal(err)
+	}
+	if res.StatusCode != http.StatusCreated {
+		t.Errorf("got: %v, want: %v", res.StatusCode, http.StatusCreated)
+	}
+	if gotBody.Id == "" {
+		t.Errorf("got: %v, want: [UUID]", gotBody.Id)
+	}
+	if gotBody.FirstName != personReq.FirstName {
+		t.Errorf("got: %v, want: %v", gotBody.FirstName, personReq.FirstName)
+	}
+	if gotBody.LastName != personReq.LastName {
+		t.Errorf("got: %v, want: %v", gotBody.LastName, personReq.LastName)
+	}
+}
+
+func TestDeletePerson(t *testing.T) {
+	awsSess = createSess(t)
+	ddb := dynamo.New(awsSess.Sess)
+	tableName := "test_table_for_delete_person"
+	createTable(t, ddb, tableName)
+	defer deleteTable(t, ddb, tableName)
+	reqBody := createRecord(t, ddb, tableName)
+	if err := os.Setenv("TABLE_NAME", tableName); err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(reqBody[0].Id)
+
+	pathParameters := map[string]string{
+		"personId": reqBody[0].Id,
+	}
+
+	// Handlerは必ずerrを返さない
+	req := events.APIGatewayProxyRequest{
+		HTTPMethod:     http.MethodDelete,
+		PathParameters: pathParameters,
+	}
+	res, _ := Handler(req)
+
+	if res.StatusCode != http.StatusNoContent {
+		t.Errorf("got: %v, want: %v", res.StatusCode, http.StatusNoContent)
+	}
+	if res.Body != "" {
+		t.Errorf("got: %v, want: [Blank]", res.Body)
 	}
 }

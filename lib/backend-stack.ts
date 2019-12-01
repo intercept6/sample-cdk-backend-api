@@ -40,7 +40,7 @@ export class BackendStack extends Stack {
         personsTable.grantReadData(getPersonsFunc);
 
         const addPersonFunc = new LambdaBackend(this, 'AddPerson', {
-            code: Code.fromAsset('./src/backend/persons/add-person'),
+            code: Code.fromAsset('./src/backend/persons/get-persons'),
             resource: personsPath,
             method: 'POST',
             environment: {
@@ -52,7 +52,7 @@ export class BackendStack extends Stack {
         const personIdPath = personsPath.addResource('{personId}');
 
         const delPersonFunc = new LambdaBackend(this, 'DelPerson', {
-            code: Code.fromAsset('./src/backend/persons/del-person'),
+            code: Code.fromAsset('./src/backend/persons/get-persons'),
             resource: personIdPath,
             method: 'DELETE',
             environment: {
