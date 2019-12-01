@@ -18,36 +18,60 @@ type PersonRes struct {
 	LastName  string `dynamo:"LastName"`
 }
 
+type AwsSess struct {
+	Sess *session.Session `json:"sesson"`
+	Err  error            `json:"error"`
+}
+
+var awsSess AwsSess
+
+func init() {
+	awsSess.Sess, awsSess.Err = session.NewSession()
+	if awsSess.Err != nil {
+		panic(awsSess.Err)
+	}
+}
+
+func createRes(code int, msg string) (events.APIGatewayProxyResponse, error) {
+	header := map[string]string{
+		"Content-Type":                     "application/json",
+		"Access-Control-Allow-Origin":      "*",
+		"Access-Control-Allow-Credentials": "true",
+	}
+	res := events.APIGatewayProxyResponse{
+		StatusCode: code,
+		Headers:    header,
+		Body:       msg,
+	}
+	return res, nil
+}
+
 func Handler() (events.APIGatewayProxyResponse, error) {
 
-	sess, err := session.NewSession()
-	if err != nil {
-		panic(err)
+	// AWS SDKのセッション作成でエラーが発生した場合の処理
+	if awsSess.Err != nil {
+		return createRes(http.StatusInternalServerError,
+			fmt.Sprintf("create aws session error: %s", awsSess.Err.Error()))
 	}
 
-	ddb := dynamo.New(sess)
+	ddb := dynamo.New(awsSess.Sess)
 	table := ddb.Table(os.Getenv("TABLE_NAME"))
 
 	var persons []PersonRes
 
-	err = table.Scan().All(&persons)
+	err := table.Scan().All(&persons)
 	if err != nil {
-		panic(err)
-	}
-	fmt.Println(persons)
-
-	jsonBytes, _ := json.Marshal(persons)
-
-	resp := events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
-		Body: string(jsonBytes),
+		return createRes(http.StatusInternalServerError,
+			fmt.Sprintf("scan error: %s", err.Error()))
 	}
 
-	return resp, nil
+	jsonBytes, err := json.Marshal(persons)
+	if err != nil {
+		return createRes(http.StatusInternalServerError,
+			fmt.Sprintf("create json error: %s", err.Error()))
+	}
+
+	return createRes(http.StatusOK, string(jsonBytes))
 }
 
 func main() {
