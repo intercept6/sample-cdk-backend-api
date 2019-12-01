@@ -11,18 +11,14 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const writeFile = util.promisify(fs.writeFile);
 
-const lambda_func_basedir = '/src/backend/persons';
-const lambda_func_dir = [`${lambda_func_basedir}/add-person`, `${lambda_func_basedir}/get-persons`,
-    `${lambda_func_basedir}/del-person`];
+const lambda_func_basedir = '/src/backend/';
 
 async function deploy() {
     const app = new cdk.App();
 
-    for (let dir of lambda_func_dir) {
-        await exec(`GO111MODULE=off go get -v -t -d .${dir}/... && ` +
-            'GOOS=linux GOARCH=amd64 ' +
-            `go build -o .${dir}/main .${dir}/**.go`);
-    }
+    await exec(`GO111MODULE=off go get -v -t -d .${lambda_func_basedir}/persons/... && ` +
+        'GOOS=linux GOARCH=amd64 ' +
+        `go build -o .${lambda_func_basedir}/persons/persons .${lambda_func_basedir}/persons/**.go`);
     const backend = await new BackendStack(app, 'BackendStack');
     const cfn = new AWS.CloudFormation();
     const backendStack = await cfn.describeStacks({StackName: 'BackendStack'}).promise();
@@ -49,9 +45,7 @@ async function deploy() {
 
     app.synth();
 
-    for (let dir of lambda_func_dir) {
-        await exec(`rm .${dir}/main`);
-    }
+    await exec(`rm .${lambda_func_basedir}/persons/persons`);
 }
 
 deploy();

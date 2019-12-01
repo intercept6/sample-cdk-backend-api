@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/google/uuid"
-
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/google/uuid"
 	"github.com/guregu/dynamo"
 )
 
@@ -135,10 +134,11 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	case req.HTTPMethod == http.MethodPost && req.Path == "/persons":
 		return addPerson(table, req.Body)
 	// DELETE /persons/{personId}
-	// TODO: req.Path == "" で本当に良いのか？
-	case req.HTTPMethod == http.MethodDelete && req.Path == "":
+	case req.HTTPMethod == http.MethodDelete && req.Path ==
+		fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
 		return delPerson(table, req.PathParameters["personId"])
 	}
+
 	return createRes(http.StatusNotFound, "not found path or not allowed method")
 }
 

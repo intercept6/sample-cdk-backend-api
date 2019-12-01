@@ -8,7 +8,6 @@ export class FrontendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        //<a href="https://qiita.com/tetsuya-zama/items/398e9fbae42d31c40db5" target="_blank">AWS CDKの&apos;aws-s3-deployment&apos;を使ってクライアントサイドも一緒にデプロイする - Qiita</a>
         const websiteBucket = new Bucket(this, 'Website', {
             removalPolicy: RemovalPolicy.DESTROY
         });
@@ -27,7 +26,6 @@ export class FrontendStack extends Stack {
                 new CanonicalUserPrincipal(OAI.attrS3CanonicalUserId)
             ]
         });
-        // webSiteBucketPolicyStatement.addCanonicalUserPrincipal(OAI.attrS3CanonicalUserId);
         websiteBucket.addToResourcePolicy(webSiteBucketPolicyStatement);
 
         const distribution = new CloudFrontWebDistribution(this, 'WebsiteDistribution', {

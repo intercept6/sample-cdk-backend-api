@@ -1,17 +1,18 @@
-import {Code} from '@aws-cdk/aws-lambda';
-import {LambdaBackend} from './lambda-backend';
-import {Cors, RestApi} from '@aws-cdk/aws-apigateway';
+import {Code, Function, Runtime} from '@aws-cdk/aws-lambda';
+import {Cors, LambdaIntegration, RestApi} from '@aws-cdk/aws-apigateway';
 import {AttributeType, BillingMode, Table} from '@aws-cdk/aws-dynamodb';
 import {CfnOutput, Construct, Stack, StackProps} from "@aws-cdk/core";
+import {RetentionDays} from "@aws-cdk/aws-logs";
+import {HTTPMethod} from 'http-method-enum';
 
 
 export class BackendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        // API Gateway
+        // APIGWの作成
         const api = new RestApi(this, 'RestApi', {
-            restApiName: 'SampleCdkBackendApi',
+            restApiName: 'BackendApi',
             defaultCorsPreflightOptions: {
                 allowOrigins: Cors.ALL_ORIGINS,
                 allowCredentials: true,
@@ -19,48 +20,31 @@ export class BackendStack extends Stack {
             }
         });
 
-        // DynamoDB
+        // DynamoDBの作成
         const personsTable = new Table(this, 'PersonsTable', {
             billingMode: BillingMode.PAY_PER_REQUEST,
             partitionKey: {name: 'Id', type: AttributeType.STRING}
         });
 
-        // Lambda Functions
-        // /persons
+        // Lambda関数の作成
+        const personsFunc = new Function(this, 'PersonsFunc', {
+            code: Code.fromAsset('./src/backend/persons'),
+            handler: 'persons',
+            runtime: Runtime.GO_1_X,
+            environment: {
+                'TABLE_NAME': personsTable.tableName
+            },
+            logRetention: RetentionDays.TWO_WEEKS,
+        });
+        personsTable.grantReadWriteData(personsFunc);
+        const personsInteg = new LambdaIntegration(personsFunc);
+
+        // APIGWとLambdaの関連付け
         const personsPath = api.root.addResource('persons');
-
-        const getPersonsFunc = new LambdaBackend(this, 'GetPersons', {
-            code: Code.fromAsset('./src/backend/persons/get-persons'),
-            resource: personsPath,
-            method: 'GET',
-            environment: {
-                'TABLE_NAME': personsTable.tableName
-            }
-        });
-        personsTable.grantReadData(getPersonsFunc);
-
-        const addPersonFunc = new LambdaBackend(this, 'AddPerson', {
-            code: Code.fromAsset('./src/backend/persons/get-persons'),
-            resource: personsPath,
-            method: 'POST',
-            environment: {
-                'TABLE_NAME': personsTable.tableName
-            }
-        });
-        personsTable.grantReadWriteData(addPersonFunc);
-
         const personIdPath = personsPath.addResource('{personId}');
-
-        const delPersonFunc = new LambdaBackend(this, 'DelPerson', {
-            code: Code.fromAsset('./src/backend/persons/get-persons'),
-            resource: personIdPath,
-            method: 'DELETE',
-            environment: {
-                'TABLE_NAME': personsTable.tableName
-            }
-        });
-        personsTable.grantReadWriteData(delPersonFunc);
-
+        personsPath.addMethod(HTTPMethod.GET, personsInteg);
+        personsPath.addMethod(HTTPMethod.POST, personsInteg);
+        personIdPath.addMethod(HTTPMethod.DELETE, personsInteg);
 
         new CfnOutput(this, 'ApiUrl', {value: api.url});
     }

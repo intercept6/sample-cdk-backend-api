@@ -156,14 +156,13 @@ func TestDeletePerson(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println(reqBody[0].Id)
-
 	pathParameters := map[string]string{
 		"personId": reqBody[0].Id,
 	}
 
 	// Handlerは必ずerrを返さない
 	req := events.APIGatewayProxyRequest{
+		Path:           fmt.Sprintf("/persons/%s", reqBody[0].Id),
 		HTTPMethod:     http.MethodDelete,
 		PathParameters: pathParameters,
 	}

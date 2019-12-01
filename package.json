@@ -36,6 +36,7 @@
     "aws-sdk": "2.575.0",
     "axios": "0.19.0",
     "frontend": "file:src/frontend",
+    "http-method-enum": "1.0.0",
     "source-map-support": "^0.5.9"
   }
 }
