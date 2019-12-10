@@ -8,16 +8,19 @@ export class FrontendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
+        // Bucketの作成
         const websiteBucket = new Bucket(this, 'Website', {
             removalPolicy: RemovalPolicy.DESTROY
         });
 
+        // OAIの作成
         const OAI = new CfnCloudFrontOriginAccessIdentity(this, 'OAI', {
             cloudFrontOriginAccessIdentityConfig: {
                 comment: websiteBucket.bucketName
             }
         });
 
+        // Bucket Policy(OAIに関して)を作成
         const webSiteBucketPolicyStatement = new PolicyStatement({
             effect: Effect.ALLOW,
             actions: ['s3:GetObject'],
@@ -60,7 +63,6 @@ export class FrontendStack extends Stack {
             priceClass: PriceClass.PRICE_CLASS_200
         });
 
-        // TODO: インヴァリデーションが実行されるトリガは何か？
         new BucketDeployment(this, 'DeployWebsite', {
             sources: [Source.asset('src/frontend/dist')],
             destinationBucket: websiteBucket,
@@ -68,6 +70,6 @@ export class FrontendStack extends Stack {
             distributionPaths: ['/*']
         });
 
-        new CfnOutput(this, 'CFTopURL', {value: `https://${distribution.domainName}/`})
+        new CfnOutput(this, 'URL', {value: `https://${distribution.domainName}/`})
     }
 }

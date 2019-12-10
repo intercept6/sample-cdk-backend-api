@@ -6,7 +6,6 @@
   },
   "scripts": {
     "watch": "tsc -w",
-    "test": "jest",
     "cdk": "cdk",
     "prebuild:frontend": "API_URL=$(aws ssm get-parameter --name /BackendStack/ApiUrl --query Parameter.Value --output text) && echo \"NODE_ENV='production'\nVUE_APP_API_BASE_URL='${API_URL}'\" > ./src/frontend/.env",
     "build": "tsc",

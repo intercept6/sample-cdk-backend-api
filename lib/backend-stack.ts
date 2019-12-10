@@ -40,13 +40,14 @@ export class BackendStack extends Stack {
         personsTable.grantReadWriteData(personsFunc);
         const personsInteg = new LambdaIntegration(personsFunc);
 
-        // APIGWとLambdaの関連付け
+        // API GatewayとLambdaの関連付け
         const personsPath = api.root.addResource('persons');
         const personIdPath = personsPath.addResource('{personId}');
         personsPath.addMethod(HTTPMethod.GET, personsInteg);
         personsPath.addMethod(HTTPMethod.POST, personsInteg);
         personIdPath.addMethod(HTTPMethod.DELETE, personsInteg);
 
+        // SSM Parameter StoreにAPIのURLをエクスポート
         new StringParameter(this, 'ApiUrlParam', {
             parameterName: `/${this.stackName}/ApiUrl`,
             stringValue: api.url,
