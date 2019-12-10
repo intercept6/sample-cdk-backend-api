@@ -1,7 +1,7 @@
 
 start-locakstack:
-	@docker-compose up -d
+	@TMPDIR=/private${TMPDIR} docker-compose up -d
 
-test: start-locakstack
+test:
 	@cd src/backend/persons && \
 	go test -v ./...

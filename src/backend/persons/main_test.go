@@ -96,8 +96,6 @@ func TestGetPerson(t *testing.T) {
 	if !reflect.DeepEqual(gotBody, wantBody) {
 		t.Errorf("got: %v, want: %v", res.Body, wantBody)
 	}
-
-	// TODO: DynamoDBにレコードが存在するか確認する
 }
 
 func TestAddPerson(t *testing.T) {
@@ -143,6 +141,38 @@ func TestAddPerson(t *testing.T) {
 	if gotBody.LastName != personReq.LastName {
 		t.Errorf("got: %v, want: %v", gotBody.LastName, personReq.LastName)
 	}
+
+	table := ddb.Table(tableName)
+	var persons []Person
+
+	err = table.Scan().All(&persons)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonBytes, err := json.Marshal(persons)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var gotData []Person
+	err = json.Unmarshal(jsonBytes, &gotData)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantData := Person{
+		Id:        "[UUID]",
+		FirstName: "Taro",
+		LastName:  "Yamada",
+	}
+	if gotData[0].Id == "" {
+		t.Errorf("got: %v, want: [UUID]", gotData[0].Id)
+	}
+	if gotData[0].FirstName != wantData.FirstName {
+		t.Errorf("got: %v, want: %v", gotData[0].FirstName, wantData.FirstName)
+	}
+	if gotData[0].LastName != wantData.LastName {
+		t.Errorf("got: %v, want: %v", gotData[0].LastName, wantData.LastName)
+	}
+
 }
 
 func TestDeletePerson(t *testing.T) {

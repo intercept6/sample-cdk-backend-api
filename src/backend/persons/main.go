@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -33,9 +34,6 @@ var awsSess AwsSess
 
 func init() {
 	awsSess.Sess, awsSess.Err = session.NewSession()
-	if awsSess.Err != nil {
-		panic(awsSess.Err)
-	}
 }
 
 func createRes(code int, msg string) (events.APIGatewayProxyResponse, error) {
@@ -73,7 +71,6 @@ func getPersons(table dynamo.Table) (events.APIGatewayProxyResponse, error) {
 func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyResponse, error) {
 
 	id, _ := uuid.NewUUID()
-
 	jsonBytes := []byte(reqBody)
 
 	// Bodyを構造体に変換
@@ -119,8 +116,9 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	// AWS SDKのセッション作成でエラーが発生した場合の処理
 	if awsSess.Err != nil {
+		log.Printf("create aws session error: %s", awsSess.Err.Error())
 		return createRes(http.StatusInternalServerError,
-			fmt.Sprintf("create aws session error: %s", awsSess.Err.Error()))
+			fmt.Sprint("internal server error"))
 	}
 
 	ddb := dynamo.New(awsSess.Sess)
