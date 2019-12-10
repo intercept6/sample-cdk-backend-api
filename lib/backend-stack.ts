@@ -1,8 +1,9 @@
 import {Code, Function, Runtime} from '@aws-cdk/aws-lambda';
 import {Cors, LambdaIntegration, RestApi} from '@aws-cdk/aws-apigateway';
 import {AttributeType, BillingMode, Table} from '@aws-cdk/aws-dynamodb';
-import {CfnOutput, Construct, Stack, StackProps} from "@aws-cdk/core";
-import {RetentionDays} from "@aws-cdk/aws-logs";
+import {Construct, Stack, StackProps} from '@aws-cdk/core';
+import {StringParameter} from '@aws-cdk/aws-ssm'
+import {RetentionDays} from '@aws-cdk/aws-logs';
 import {HTTPMethod} from 'http-method-enum';
 
 
@@ -10,7 +11,7 @@ export class BackendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        // APIGWの作成
+        // APIGatewayの作成
         const api = new RestApi(this, 'RestApi', {
             restApiName: 'BackendApi',
             defaultCorsPreflightOptions: {
@@ -46,6 +47,9 @@ export class BackendStack extends Stack {
         personsPath.addMethod(HTTPMethod.POST, personsInteg);
         personIdPath.addMethod(HTTPMethod.DELETE, personsInteg);
 
-        new CfnOutput(this, 'ApiUrl', {value: api.url});
+        new StringParameter(this, 'ApiUrlParam', {
+            parameterName: `/${this.stackName}/ApiUrl`,
+            stringValue: api.url,
+        });
     }
 }

@@ -1,3 +1,6 @@
 {
-  "app": "npx ts-node bin/sample-cdk-backend-api.ts"
+  "app": "npx ts-node bin/sample-cdk-backend-api.ts",
+  "context": {
+    "region": "ap-northeast-1"
+  }
 }

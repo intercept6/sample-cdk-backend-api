@@ -60,6 +60,7 @@ export class FrontendStack extends Stack {
             priceClass: PriceClass.PRICE_CLASS_200
         });
 
+        // TODO: インヴァリデーションが実行されるトリガは何か？
         new BucketDeployment(this, 'DeployWebsite', {
             sources: [Source.asset('src/frontend/dist')],
             destinationBucket: websiteBucket,
