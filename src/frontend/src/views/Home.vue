@@ -8,17 +8,17 @@
     <ion-content class="ion-padding">
       <ion-item>
         <ion-input
-                :value="firstName"
-                @ionInput="firstName = $event.target.value"
-                placeholder="Enter first name"
+          :value="firstName"
+          @ionInput="firstName = $event.target.value"
+          placeholder="Enter first name"
         >
         </ion-input>
       </ion-item>
       <ion-item>
         <ion-input
-                :value="lastName"
-                @ionInput="lastName = $event.target.value"
-                placeholder="Enter last name"
+          :value="lastName"
+          @ionInput="lastName = $event.target.value"
+          placeholder="Enter last name"
         >
         </ion-input>
       </ion-item>
@@ -28,13 +28,13 @@
 </template>
 
 <script>
-  import axios from "axios";
+import axios from "axios";
 
-  const baseUrl = process.env.VUE_APP_API_BASE_URL;
+const baseUrl = process.env.VUE_APP_API_BASE_URL;
 
 export default {
   name: "home",
-  data: function () {
+  data: function() {
     return {
       firstName: "",
       lastName: ""

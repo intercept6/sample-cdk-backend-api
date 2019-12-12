@@ -17,9 +17,9 @@
 </template>
 
 <script>
-  import axios from "axios";
+import axios from "axios";
 
-  const baseUrl = process.env.VUE_APP_API_BASE_URL;
+const baseUrl = process.env.VUE_APP_API_BASE_URL;
 
 export default {
   name: "about",
