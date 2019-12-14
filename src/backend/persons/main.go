@@ -20,7 +20,7 @@ type PersonReq struct {
 }
 
 type Person struct {
-	Id        string `dynamo:"Id"`
+	ID        string `dynamo:"ID"`
 	FirstName string `dynamo:"FirstName"`
 	LastName  string `dynamo:"LastName"`
 }
@@ -82,7 +82,7 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 
 	// 書き込むための構造体を作成
 	person := Person{
-		Id:        id.String(),
+		ID:        id.String(),
 		LastName:  personReq.LastName,
 		FirstName: personReq.FirstName,
 	}
@@ -103,7 +103,7 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 }
 
 func delPerson(table dynamo.Table, id string) (events.APIGatewayProxyResponse, error) {
-	err := table.Delete("Id", id).Run()
+	err := table.Delete("ID", id).Run()
 	if err != nil {
 		return createRes(http.StatusInternalServerError,
 			fmt.Sprintf("delete person error: %s", err.Error()))

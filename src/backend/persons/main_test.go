@@ -39,7 +39,7 @@ func createSess(t *testing.T) AwsSess {
 func createTable(t *testing.T, ddb *dynamo.DB, tableName string) {
 	t.Helper()
 	type PersonsTable struct {
-		Id string `dynamo:"Id,hash"`
+		ID string `dynamo:"ID,hash"`
 	}
 	res := ddb.CreateTable(tableName, PersonsTable{})
 	if err := res.Run(); err != nil {
@@ -50,7 +50,7 @@ func createTable(t *testing.T, ddb *dynamo.DB, tableName string) {
 func createRecord(t *testing.T, ddb *dynamo.DB, tableName string) []Person {
 	t.Helper()
 	table := ddb.Table(tableName)
-	item := Person{Id: "556350d2-e993-4fb9-8242-c496a0664bb3", LastName: "Taro", FirstName: "Yamada"}
+	item := Person{ID: "556350d2-e993-4fb9-8242-c496a0664bb3", LastName: "Taro", FirstName: "Yamada"}
 	err := table.Put(item).Run()
 	if err != nil {
 		t.Fatal(err)
@@ -132,8 +132,8 @@ func TestAddPerson(t *testing.T) {
 	if res.StatusCode != http.StatusCreated {
 		t.Errorf("got: %v, want: %v", res.StatusCode, http.StatusCreated)
 	}
-	if gotBody.Id == "" {
-		t.Errorf("got: %v, want: [UUID]", gotBody.Id)
+	if gotBody.ID == "" {
+		t.Errorf("got: %v, want: [UUID]", gotBody.ID)
 	}
 	if gotBody.FirstName != personReq.FirstName {
 		t.Errorf("got: %v, want: %v", gotBody.FirstName, personReq.FirstName)
@@ -159,12 +159,12 @@ func TestAddPerson(t *testing.T) {
 		t.Fatal(err)
 	}
 	wantData := Person{
-		Id:        "[UUID]",
+		ID:        "[UUID]",
 		FirstName: "Taro",
 		LastName:  "Yamada",
 	}
-	if gotData[0].Id == "" {
-		t.Errorf("got: %v, want: [UUID]", gotData[0].Id)
+	if gotData[0].ID == "" {
+		t.Errorf("got: %v, want: [UUID]", gotData[0].ID)
 	}
 	if gotData[0].FirstName != wantData.FirstName {
 		t.Errorf("got: %v, want: %v", gotData[0].FirstName, wantData.FirstName)
@@ -187,12 +187,12 @@ func TestDeletePerson(t *testing.T) {
 	}
 
 	pathParameters := map[string]string{
-		"personId": reqBody[0].Id,
+		"personId": reqBody[0].ID,
 	}
 
 	// Handlerは必ずerrを返さない
 	req := events.APIGatewayProxyRequest{
-		Path:           fmt.Sprintf("/persons/%s", reqBody[0].Id),
+		Path:           fmt.Sprintf("/persons/%s", reqBody[0].ID),
 		HTTPMethod:     http.MethodDelete,
 		PathParameters: pathParameters,
 	}
