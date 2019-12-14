@@ -51,22 +51,22 @@ func createResponse(code int, msg string) events.APIGatewayProxyResponse {
 	return res
 }
 
-func getPersons(table dynamo.Table) (events.APIGatewayProxyResponse, error) {
+func getPersons(table dynamo.Table) events.APIGatewayProxyResponse {
 	var persons []Person
 
 	err := table.Scan().All(&persons)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("scan error: %s", err.Error())), nil
+			fmt.Sprintf("scan error: %s", err.Error()))
 	}
 
 	jsonBytes, err := json.Marshal(persons)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("create json error: %s", err.Error())), nil
+			fmt.Sprintf("create json error: %s", err.Error()))
 	}
 
-	return createResponse(http.StatusOK, string(jsonBytes)), nil
+	return createResponse(http.StatusOK, string(jsonBytes))
 }
 
 func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyResponse, error) {
@@ -126,7 +126,7 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	switch {
 	// GET /persons
 	case req.HTTPMethod == http.MethodGet && req.Path == "/persons":
-		return getPersons(table)
+		return getPersons(table), nil
 	// POST /persons
 	case req.HTTPMethod == http.MethodPost && req.Path == "/persons":
 		return addPerson(table, req.Body)
