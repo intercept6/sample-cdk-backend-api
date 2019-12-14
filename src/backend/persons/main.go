@@ -60,13 +60,13 @@ func getPersons(table dynamo.Table) events.APIGatewayProxyResponse {
 			fmt.Sprintf("scan error: %s", err.Error()))
 	}
 
-	jsonBytes, err := json.Marshal(persons)
+	json, err := json.Marshal(persons)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("create json error: %s", err.Error()))
 	}
 
-	return createResponse(http.StatusOK, string(jsonBytes))
+	return createResponse(http.StatusOK, string(json))
 }
 
 func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyResponse {
