@@ -22,10 +22,10 @@ const (
 	region           = "ap-northeast-1"
 )
 
-func createSess(t *testing.T) AwsSess {
+func createSess(t *testing.T) AwsSession {
 	t.Helper()
 
-	awsSess = AwsSess{}
+	awsSess = AwsSession{}
 
 	awsSess.Sess, awsSess.Err = session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials("DUMMY", "DUMMY", "DUMMY"),

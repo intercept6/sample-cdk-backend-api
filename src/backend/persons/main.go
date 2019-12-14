@@ -25,12 +25,12 @@ type Person struct {
 	LastName  string `dynamo:"LastName"`
 }
 
-type AwsSess struct {
+type AwsSession struct {
 	Sess *session.Session
 	Err  error
 }
 
-var awsSess AwsSess
+var awsSess AwsSession
 
 func init() {
 	awsSess.Sess, awsSess.Err = session.NewSession()
