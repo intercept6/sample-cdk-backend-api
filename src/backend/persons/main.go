@@ -71,11 +71,10 @@ func getPersons(table dynamo.Table) events.APIGatewayProxyResponse {
 
 func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyResponse {
 	id := uuid.New()
-	jsonBytes := []byte(reqBody)
 
 	// Bodyを構造体に変換
 	var personReq PersonRequest
-	if err := json.Unmarshal(jsonBytes, &personReq); err != nil {
+	if err := json.Unmarshal([]byte(reqBody), &personReq); err != nil {
 		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("decode json error: %s", err.Error()))
 	}
@@ -135,7 +134,7 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		req.Path == fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
 		return deletePerson(table, req.PathParameters["personId"]), nil
 	}
-	ß
+
 	return createResponse(http.StatusNotFound, "not found path or not allowed method"), nil
 }
 
