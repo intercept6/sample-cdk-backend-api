@@ -69,7 +69,7 @@ func getPersons(table dynamo.Table) events.APIGatewayProxyResponse {
 	return createResponse(http.StatusOK, string(jsonBytes))
 }
 
-func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyResponse, error) {
+func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyResponse {
 	id, _ := uuid.NewUUID()
 	jsonBytes := []byte(reqBody)
 
@@ -77,7 +77,7 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 	personReq := new(PersonReq)
 	if err := json.Unmarshal(jsonBytes, personReq); err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("decode json error: %s", err.Error())), nil
+			fmt.Sprintf("decode json error: %s", err.Error()))
 	}
 
 	// 書き込むための構造体を作成
@@ -90,16 +90,16 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 	err := table.Put(person).Run()
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("add person error: %s", err.Error())), nil
+			fmt.Sprintf("add person error: %s", err.Error()))
 	}
 
 	res, err := json.Marshal(person)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("create json error: %s", err.Error())), nil
+			fmt.Sprintf("create json error: %s", err.Error()))
 	}
 
-	return createResponse(http.StatusCreated, string(res)), nil
+	return createResponse(http.StatusCreated, string(res))
 }
 
 func delPerson(table dynamo.Table, id string) (events.APIGatewayProxyResponse, error) {
@@ -129,7 +129,7 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		return getPersons(table), nil
 	// POST /persons
 	case req.HTTPMethod == http.MethodPost && req.Path == "/persons":
-		return addPerson(table, req.Body)
+		return addPerson(table, req.Body), nil
 	// DELETE /persons/{personId}
 	case req.HTTPMethod == http.MethodDelete &&
 		req.Path == fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
