@@ -74,8 +74,8 @@ func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyRespons
 	jsonBytes := []byte(reqBody)
 
 	// Bodyを構造体に変換
-	personReq := new(PersonRequest)
-	if err := json.Unmarshal(jsonBytes, personReq); err != nil {
+	var personReq PersonRequest
+	if err := json.Unmarshal(jsonBytes, &personReq); err != nil {
 		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("decode json error: %s", err.Error()))
 	}
