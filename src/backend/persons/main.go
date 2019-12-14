@@ -26,8 +26,8 @@ type Person struct {
 }
 
 type AwsSess struct {
-	Sess *session.Session `json:"sesson"`
-	Err  error            `json:"error"`
+	Sess *session.Session
+	Err  error
 }
 
 var awsSess AwsSess
