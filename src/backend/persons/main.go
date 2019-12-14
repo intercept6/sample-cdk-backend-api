@@ -102,7 +102,7 @@ func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyRespons
 	return createResponse(http.StatusCreated, string(res))
 }
 
-func delPerson(table dynamo.Table, id string) events.APIGatewayProxyResponse {
+func deletePerson(table dynamo.Table, id string) events.APIGatewayProxyResponse {
 	err := table.Delete("ID", id).Run()
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
@@ -133,7 +133,7 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	// DELETE /persons/{personId}
 	case req.HTTPMethod == http.MethodDelete &&
 		req.Path == fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
-		return delPerson(table, req.PathParameters["personId"]), nil
+		return deletePerson(table, req.PathParameters["personId"]), nil
 	}
 	ß
 	return createResponse(http.StatusNotFound, "not found path or not allowed method"), nil
