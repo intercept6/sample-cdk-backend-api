@@ -47,6 +47,7 @@ func createRes(code int, msg string) (events.APIGatewayProxyResponse, error) {
 		Headers:    header,
 		Body:       msg,
 	}
+
 	return res, nil
 }
 
@@ -69,7 +70,6 @@ func getPersons(table dynamo.Table) (events.APIGatewayProxyResponse, error) {
 }
 
 func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyResponse, error) {
-
 	id, _ := uuid.NewUUID()
 	jsonBytes := []byte(reqBody)
 
@@ -113,7 +113,6 @@ func delPerson(table dynamo.Table, id string) (events.APIGatewayProxyResponse, e
 }
 
 func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
 	// AWS SDKのセッション作成でエラーが発生した場合の処理
 	if awsSess.Err != nil {
 		log.Printf("create aws session error: %s", awsSess.Err.Error())
@@ -132,8 +131,8 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	case req.HTTPMethod == http.MethodPost && req.Path == "/persons":
 		return addPerson(table, req.Body)
 	// DELETE /persons/{personId}
-	case req.HTTPMethod == http.MethodDelete && req.Path ==
-		fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
+	case req.HTTPMethod == http.MethodDelete &&
+		req.Path == fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
 		return delPerson(table, req.PathParameters["personId"])
 	}
 
