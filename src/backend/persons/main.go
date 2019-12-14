@@ -70,7 +70,7 @@ func getPersons(table dynamo.Table) events.APIGatewayProxyResponse {
 }
 
 func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyResponse {
-	id, _ := uuid.NewUUID()
+	id := uuid.New()
 	jsonBytes := []byte(reqBody)
 
 	// Bodyを構造体に変換
