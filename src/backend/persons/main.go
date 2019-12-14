@@ -36,7 +36,7 @@ func init() {
 	awsSess.Sess, awsSess.Err = session.NewSession()
 }
 
-func createResponse(code int, msg string) (events.APIGatewayProxyResponse, error) {
+func createResponse(code int, msg string) events.APIGatewayProxyResponse {
 	header := map[string]string{
 		"Content-Type":                     "application/json",
 		"Access-Control-Allow-Origin":      "*",
@@ -48,7 +48,7 @@ func createResponse(code int, msg string) (events.APIGatewayProxyResponse, error
 		Body:       msg,
 	}
 
-	return res, nil
+	return res
 }
 
 func getPersons(table dynamo.Table) (events.APIGatewayProxyResponse, error) {
@@ -57,16 +57,16 @@ func getPersons(table dynamo.Table) (events.APIGatewayProxyResponse, error) {
 	err := table.Scan().All(&persons)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("scan error: %s", err.Error()))
+			fmt.Sprintf("scan error: %s", err.Error())), nil
 	}
 
 	jsonBytes, err := json.Marshal(persons)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("create json error: %s", err.Error()))
+			fmt.Sprintf("create json error: %s", err.Error())), nil
 	}
 
-	return createResponse(http.StatusOK, string(jsonBytes))
+	return createResponse(http.StatusOK, string(jsonBytes)), nil
 }
 
 func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyResponse, error) {
@@ -77,7 +77,7 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 	personReq := new(PersonReq)
 	if err := json.Unmarshal(jsonBytes, personReq); err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("decode json error: %s", err.Error()))
+			fmt.Sprintf("decode json error: %s", err.Error())), nil
 	}
 
 	// 書き込むための構造体を作成
@@ -90,26 +90,26 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 	err := table.Put(person).Run()
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("add person error: %s", err.Error()))
+			fmt.Sprintf("add person error: %s", err.Error())), nil
 	}
 
 	res, err := json.Marshal(person)
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("create json error: %s", err.Error()))
+			fmt.Sprintf("create json error: %s", err.Error())), nil
 	}
 
-	return createResponse(http.StatusCreated, string(res))
+	return createResponse(http.StatusCreated, string(res)), nil
 }
 
 func delPerson(table dynamo.Table, id string) (events.APIGatewayProxyResponse, error) {
 	err := table.Delete("ID", id).Run()
 	if err != nil {
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprintf("delete person error: %s", err.Error()))
+			fmt.Sprintf("delete person error: %s", err.Error())), nil
 	}
 
-	return createResponse(http.StatusNoContent, "")
+	return createResponse(http.StatusNoContent, ""), nil
 }
 
 func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -117,7 +117,7 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	if awsSess.Err != nil {
 		log.Printf("create aws session error: %s", awsSess.Err.Error())
 		return createResponse(http.StatusInternalServerError,
-			fmt.Sprint("internal server error"))
+			fmt.Sprint("internal server error")), nil
 	}
 
 	ddb := dynamo.New(awsSess.Sess)
@@ -135,8 +135,8 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		req.Path == fmt.Sprintf("/persons/%s", req.PathParameters["personId"]):
 		return delPerson(table, req.PathParameters["personId"])
 	}
-
-	return createResponse(http.StatusNotFound, "not found path or not allowed method")
+	ß
+	return createResponse(http.StatusNotFound, "not found path or not allowed method"), nil
 }
 
 func main() {
