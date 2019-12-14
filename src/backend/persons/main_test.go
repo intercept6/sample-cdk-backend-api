@@ -122,7 +122,7 @@ func TestAddPerson(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	personReq := PersonReq{
+	personReq := PersonRequest{
 		FirstName: "Taro",
 		LastName:  "Yamada",
 	}

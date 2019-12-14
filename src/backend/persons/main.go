@@ -14,7 +14,7 @@ import (
 	"github.com/guregu/dynamo"
 )
 
-type PersonReq struct {
+type PersonRequest struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
@@ -74,7 +74,7 @@ func addPerson(table dynamo.Table, reqBody string) events.APIGatewayProxyRespons
 	jsonBytes := []byte(reqBody)
 
 	// Bodyを構造体に変換
-	personReq := new(PersonReq)
+	personReq := new(PersonRequest)
 	if err := json.Unmarshal(jsonBytes, personReq); err != nil {
 		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("decode json error: %s", err.Error()))
