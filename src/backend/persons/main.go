@@ -36,7 +36,7 @@ func init() {
 	awsSess.Sess, awsSess.Err = session.NewSession()
 }
 
-func createRes(code int, msg string) (events.APIGatewayProxyResponse, error) {
+func createResponse(code int, msg string) (events.APIGatewayProxyResponse, error) {
 	header := map[string]string{
 		"Content-Type":                     "application/json",
 		"Access-Control-Allow-Origin":      "*",
@@ -56,17 +56,17 @@ func getPersons(table dynamo.Table) (events.APIGatewayProxyResponse, error) {
 
 	err := table.Scan().All(&persons)
 	if err != nil {
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("scan error: %s", err.Error()))
 	}
 
 	jsonBytes, err := json.Marshal(persons)
 	if err != nil {
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("create json error: %s", err.Error()))
 	}
 
-	return createRes(http.StatusOK, string(jsonBytes))
+	return createResponse(http.StatusOK, string(jsonBytes))
 }
 
 func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyResponse, error) {
@@ -76,7 +76,7 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 	// Bodyを構造体に変換
 	personReq := new(PersonReq)
 	if err := json.Unmarshal(jsonBytes, personReq); err != nil {
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("decode json error: %s", err.Error()))
 	}
 
@@ -89,34 +89,34 @@ func addPerson(table dynamo.Table, reqBody string) (events.APIGatewayProxyRespon
 
 	err := table.Put(person).Run()
 	if err != nil {
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("add person error: %s", err.Error()))
 	}
 
 	res, err := json.Marshal(person)
 	if err != nil {
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("create json error: %s", err.Error()))
 	}
 
-	return createRes(http.StatusCreated, string(res))
+	return createResponse(http.StatusCreated, string(res))
 }
 
 func delPerson(table dynamo.Table, id string) (events.APIGatewayProxyResponse, error) {
 	err := table.Delete("ID", id).Run()
 	if err != nil {
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprintf("delete person error: %s", err.Error()))
 	}
 
-	return createRes(http.StatusNoContent, "")
+	return createResponse(http.StatusNoContent, "")
 }
 
 func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// AWS SDKのセッション作成でエラーが発生した場合の処理
 	if awsSess.Err != nil {
 		log.Printf("create aws session error: %s", awsSess.Err.Error())
-		return createRes(http.StatusInternalServerError,
+		return createResponse(http.StatusInternalServerError,
 			fmt.Sprint("internal server error"))
 	}
 
@@ -136,7 +136,7 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		return delPerson(table, req.PathParameters["personId"])
 	}
 
-	return createRes(http.StatusNotFound, "not found path or not allowed method")
+	return createResponse(http.StatusNotFound, "not found path or not allowed method")
 }
 
 func main() {
