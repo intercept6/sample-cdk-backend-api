@@ -22,7 +22,7 @@ const (
 	region           = "ap-northeast-1"
 )
 
-func createSess(t *testing.T) AwsSession {
+func createSession(t *testing.T) AwsSession {
 	t.Helper()
 
 	awsSess = AwsSession{}
@@ -76,7 +76,7 @@ func deleteTable(t *testing.T, ddb *dynamo.DB, tableName string) {
 }
 
 func TestGetPerson(t *testing.T) {
-	awsSess = createSess(t)
+	awsSess = createSession(t)
 	ddb := dynamo.New(awsSess.Sess)
 	tableName := "test_table_for_get_persons"
 
@@ -111,7 +111,7 @@ func TestGetPerson(t *testing.T) {
 }
 
 func TestAddPerson(t *testing.T) {
-	awsSess = createSess(t)
+	awsSess = createSession(t)
 	ddb := dynamo.New(awsSess.Sess)
 	tableName := "test_table_for_add_person"
 
@@ -202,7 +202,7 @@ func TestAddPerson(t *testing.T) {
 }
 
 func TestDeletePerson(t *testing.T) {
-	awsSess = createSess(t)
+	awsSess = createSession(t)
 	ddb := dynamo.New(awsSess.Sess)
 	tableName := "test_table_for_delete_person"
 
