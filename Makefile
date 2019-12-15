@@ -1,5 +1,4 @@
-
-start-locakstack:
+start-localstack:
 	@TMPDIR=/private${TMPDIR} docker-compose up -d
 
 test:

@@ -1,19 +1,20 @@
 {
-  "name": "sample-cdk-backend-api",
+  "name": "aws-for-everyone-sls",
   "version": "0.1.0",
   "bin": {
-    "sample-cdk-backend-api": "bin/sample-cdk-backend-api.js"
+    "aws-for-everyone-sls": "bin/aws-for-everyone-sls.js"
   },
   "scripts": {
     "watch": "tsc -w",
     "cdk": "cdk",
-    "prebuild:frontend": "API_URL=$(aws ssm get-parameter --name /BackendStack/ApiUrl --query Parameter.Value --output text) && echo \"NODE_ENV='production'\nVUE_APP_API_BASE_URL='${API_URL}'\" > ./src/frontend/.env",
+    "prebuild:frontend": "API_URL=$(npm run --silent task:getparam /BackendStack/ApiUrl) && echo \"NODE_ENV='production'\nVUE_APP_API_BASE_URL='${API_URL}'\" > ./src/frontend/.env",
     "build": "tsc",
     "build:backend": "GO111MODULE=off go get -v -t -d ./src/backend/persons/... && GOOS=linux GOARCH=amd64 go build -o ./src/backend/persons/persons ./src/backend/persons/**.go",
-    "build:frontend": "cd ./src/frontend/ && npm run build",
-    "deploy": "npm run build && npm run build:backend && npm run deploy:backend && npm run prebuild:frontend && npm run build:frontend && npm run deploy:frontend",
+    "build:frontend": "cd ./src/frontend/ && npm run --silent build",
+    "deploy": "npm run --silent build && npm run --silent build:backend && npm run --silent deploy:backend && npm run --silent prebuild:frontend && npm run --silent build:frontend && npm run --silent deploy:frontend",
     "deploy:backend": "cdk deploy BackendStack",
-    "deploy:frontend": "cdk deploy FrontendStack"
+    "deploy:frontend": "cdk deploy FrontendStack",
+    "task:getparam": "aws ssm get-parameter --query Parameter.Value --output text --name "
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.18.0",

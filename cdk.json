@@ -1,3 +1,3 @@
 {
-  "app": "npx ts-node bin/sample-cdk-backend-api.ts"
+  "app": "npx ts-node bin/aws-for-everyone-sls.ts"
 }
